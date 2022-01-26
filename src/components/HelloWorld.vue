@@ -1,46 +1,85 @@
 <template>
-  <div class="hello">
+  <div v-if="!loader" class="hello">
     <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
+    <div style="margin:30px auto">
+    <input id="input" class="input" type="file" accept="image/*" @change="openFile" hidden >
+    <label class="cameraParent" for="input" title="Select to choose Photo" style="cursor: pointer">
+      Click <span style="color:blue"> here </span> Select Image
+    </label>
+    </div>
+    <button @click="upload"> Upload Image</button>
+   <div class="p">
+      <p v-if="url">
+        <span style="font-weight : bold">Copy This Url :</span>
+    {{url}}
     </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+   </div>
   </div>
+<div v-else>
+  <img src="@/assets/best loader.gif" alt="">
+  <p>Your Link is Getting Ready... </p>
+    <p>Please wait...</p>
+</div>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
-  }
+  },
+  data(){
+    return {
+      url:'',
+      loader:false
+    }
+  },
+   methods: {
+    openFile(file) {      
+       var input = file.target;
+
+      var reader = new FileReader();
+      reader.readAsDataURL(input.files[0]);
+        this.image=input.files[0]
+    },
+      upload(){
+        this.loader = true;
+      if(this.image!=null){
+      const formdata = new FormData();
+        formdata.append("file",this.image );
+        formdata.append("upload_preset", "b1mhgyub")
+
+        axios.post("https://api.cloudinary.com/v1_1/darshanscloud/image/upload", formdata).then(async (res) => {
+          this.loader = false;
+          this.url = res.data.secure_url;
+        })}
+        else{
+          alert("something went wrong");
+        }
+
+      
+    },
+      AddBorderBottom(e) {
+      e.target.style.borderBottom = "2px solid #00bfa5";
+    },
+  },
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+.input{
+  text-align: center;
+  width: 70%;
+  height: 40px;
+  font-size: 20px;
+}
+button{
+  height: 30px;
+  width: 50%;
+  margin: 30px;
+}
 h3 {
   margin: 40px 0 0;
 }
